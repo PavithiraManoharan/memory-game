@@ -4,43 +4,80 @@
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-const cardSymbols = [
-"magnet", "laptop", "magic", "music", "trophy", "asterisk", "camera", "child", "heart", "compass", "bell", "at", "backward", "beer", "home", "hotel", "info", "instagram", "mixcloud", "mobile", "paw"];
-const shuffledCardSymbols = shuffle(cardSymbols);
-const takeEight = shuffledCardSymbols.slice(0,8);
-const fullSetSymbols = [...takeEight, ...takeEight];
-const readyToPlaySymbols = shuffle(fullSetSymbols);
-
-for(cardSymbol of readyToPlaySymbols) {
-    //Add fa- to each string and create a card HTML Element, add it to the ul in HTML
-    const deck = document.getElementById('deck');
-    const cardHTML = document.createElement("LI");
-    cardHTML.className = `card`;
-    cardHTML.innerHTML = `<i class="fa fa-${cardSymbol}"></i>`;
-    deck.appendChild(cardHTML);
+function prepareSymbols() {
+    const cardSymbols = [
+    "magnet", "laptop", "magic", "music", "trophy", "asterisk", "camera", "child", "heart", "compass", "bell", "at", "backward", "beer", "home", "hotel", "info", "instagram", "mixcloud", "mobile", "paw"];
+    const shuffledCardSymbols = shuffle(cardSymbols);
+    const takeEight = shuffledCardSymbols.slice(0,8);
+    const fullSetSymbols = [...takeEight, ...takeEight];
+    const readyToPlaySymbols = shuffle(fullSetSymbols);
+    return readyToPlaySymbols;
 }
-/*
- * Create a list that holds all of your cards
- */
-const cards = document.querySelectorAll('.card');
+
+function displayCardsOnGame(readyToPlaySymbols) {
+    for(cardSymbol of readyToPlaySymbols) {
+        const deck = document.getElementById('deck');
+        const cardHTML = document.createElement("LI");
+        cardHTML.className = `card`;
+        cardHTML.innerHTML = `<i class="fa fa-${cardSymbol}"></i>`;
+        deck.appendChild(cardHTML);
+    }
+}
+
 let openCards = [];
 let closedCards = [];
-
-for(let card of cards) {
-    card.addEventListener('click',cardListener);
-}
+let matchMoves = 0;
 
 function cardListener(e) {
-    
     const card = e.target;
     openTheCard(card);
     if(openCards.length >= 2) {
+        const ifMatched = checkMatch();
+        updateMoves();
+        updateStars();
+        if(ifMatched) {
+            for(openCard of openCards) {
+                openCard.classList.remove("open","show");
+                openCard.classList.add("match");
+                openCard.removeEventListener('click',cardListener);
+            }
+        }
         closeAllOpenCards();
+    }
+}
+function updateMoves() {
+    matchMoves++;
+    const movesDisplay = document.querySelector('.moves');
+    movesDisplay.innerText = matchMoves;
+}
+
+function updateStars() {
+    const star = document.querySelector('.stars').lastElementChild;
+    if (matchMoves === 15 || matchMoves === 25) {
+        star.remove();
+    }
+}
+
+function checkMatch() {
+    let symbolsGiven = [];
+    for(card of openCards) {
+        const cardSymbolElement = card.querySelector('.fa');
+        const cardSymbolElementClassname = cardSymbolElement.classList;
+        const classNameArray = cardSymbolElementClassname.values();
+        for(sClassName of classNameArray) {
+            if(sClassName !== "fa")
+            symbolsGiven.push(sClassName);
+        }
+    }
+    if(symbolsGiven[0] === symbolsGiven[1]) {
+        return true;
+    } else {
+        return false;
     }
 }
 
 function openTheCard(card) {
-    if(openCards.length < 2 && !(card.classList.contains('match') || card.classList.contains('fa'))) {
+    if(openCards.length < 2 && !(card.classList.contains('match') || card.classList.contains('fa') || card.classList.contains('open'))) {
         card.classList.add('open','show');
         addToOpenCards(card);
     }
@@ -52,7 +89,7 @@ function closeAllOpenCards() {
             openCard.classList.remove('open','show');
         }
         openCards = [];
-    }, 1000);
+    }, 400);
 }
 
 function addToOpenCards(card) {
@@ -62,7 +99,6 @@ function addToOpenCards(card) {
 // Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
-
     while (currentIndex !== 0) {
         randomIndex = Math.floor(Math.random() * currentIndex);
         currentIndex -= 1;
@@ -70,10 +106,17 @@ function shuffle(array) {
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-
     return array;
 }
 
+document.addEventListener('DOMContentLoaded', function(){
+    const gameSymbols = prepareSymbols();
+    displayCardsOnGame(gameSymbols);
+    const cards = document.querySelectorAll('.card');
+    for(let card of cards) {
+        card.addEventListener('click',cardListener);
+    }
+});
 
 /*
  * set up the event listener for a card. If a card is clicked:
