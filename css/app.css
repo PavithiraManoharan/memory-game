@@ -31,6 +31,7 @@ body {
 h1 {
     font-family: 'Open Sans', sans-serif;
     font-weight: 300;
+    text-align: center;
 }
 
 /*
@@ -106,4 +107,39 @@ h1 {
 .score-panel .restart {
     float: right;
     cursor: pointer;
+}
+
+.time {
+    margin-right: 30px;
+    float: right;
+}
+
+@media only screen and (max-width: 450px) {
+    .score-panel {
+        width: 90vw;
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    #deck {
+        width: 90vw;
+    }
+}
+
+@media only screen and (min-width: 451px) and (max-width: 674px) {
+    #deck {
+        width: 430px;
+    }
+}
+
+@media only screen and (max-width: 674px) {
+    .deck .card {
+        margin-bottom: 36px;
+    }
+}
+
+@media only screen and (min-width: 675px) {
+    #deck {
+        width: 660px;
+    }
 }
