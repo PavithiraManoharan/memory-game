@@ -168,7 +168,7 @@ function closeAllOpenCards() {
             openCard.classList.remove('open','show');
         }
         openCards = [];
-    }, 400);
+    }, 900);
 }
 
 function addToOpenCards(card) {
