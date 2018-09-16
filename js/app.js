@@ -213,7 +213,7 @@ function closeAllOpenCards() {
             openCard.classList.remove('open','show');
         }
         openCards = [];
-    }, 900);
+    }, 400);
 }
 
 /**
