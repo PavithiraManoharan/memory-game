@@ -4,9 +4,17 @@
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
+
+let openCards = [];
+let closedCards = [];
+let matchMoves = 0;
+let matchedPairs = 0;
+let starCount = 3;
+
 function prepareSymbols() {
     const cardSymbols = [
-    "magnet", "laptop", "magic", "music", "trophy", "asterisk", "camera", "child", "heart", "compass", "bell", "at", "backward", "beer", "home", "hotel", "info", "instagram", "mixcloud", "mobile", "paw"];
+    'magnet', 'laptop', 'magic', 'music', 'trophy', 'asterisk', 'camera', 'child', 'heart', 'compass', 
+    'bell', 'at', 'backward', 'beer', 'home', 'hotel', 'info', 'instagram', 'mixcloud', 'mobile', 'paw'];
     const shuffledCardSymbols = shuffle(cardSymbols);
     const takeEight = shuffledCardSymbols.slice(0,8);
     const fullSetSymbols = [...takeEight, ...takeEight];
@@ -17,16 +25,13 @@ function prepareSymbols() {
 function displayCardsOnGame(readyToPlaySymbols) {
     for(cardSymbol of readyToPlaySymbols) {
         const deck = document.getElementById('deck');
-        const cardHTML = document.createElement("LI");
+        const cardHTML = document.createElement('LI');
         cardHTML.className = `card`;
         cardHTML.innerHTML = `<i class="fa fa-${cardSymbol}"></i>`;
         deck.appendChild(cardHTML);
     }
 }
 
-let openCards = [];
-let closedCards = [];
-let matchMoves = 0;
 
 function cardListener(e) {
     const card = e.target;
@@ -37,24 +42,63 @@ function cardListener(e) {
         updateStars();
         if(ifMatched) {
             for(openCard of openCards) {
-                openCard.classList.remove("open","show");
-                openCard.classList.add("match");
+                openCard.classList.remove('open','show');
+                openCard.classList.add('match');
                 openCard.removeEventListener('click',cardListener);
+            }
+            matchedPairs++;
+            if (matchedPairs === 8) {
+                declareWin();
+                resetGame();
             }
         }
         closeAllOpenCards();
     }
 }
+
+function declareWin() {
+    const successModal = document.querySelector('#successModal .modal-body');
+    successModal.innerHTML = `
+    <p>Congratulations! You had a total of ${matchMoves} moves and finished the game with ${starCount} stars! </p>
+    `;
+    $('#successModal').modal();
+}
+
+function resetGame() {
+    const deck = document.getElementById('deck');
+    while(deck.firstChild) {
+        deck.removeChild(deck.firstChild);
+    }
+    const stars = document.querySelector('.stars');
+    while(stars.firstChild) {
+        stars.removeChild(stars.firstChild);
+    }
+    initGame();
+}
+
 function updateMoves() {
     matchMoves++;
     const movesDisplay = document.querySelector('.moves');
     movesDisplay.innerText = matchMoves;
+    document.querySelector('.movesText').innerText = (matchMoves == 1) ? 'Move' : 'Moves';
 }
 
 function updateStars() {
     const star = document.querySelector('.stars').lastElementChild;
     if (matchMoves === 15 || matchMoves === 25) {
         star.remove();
+        starCount--;
+    }
+}
+
+function displayStars(count) {
+    const stars = document.querySelector('.stars');
+    for(let i = 0; i < count; i++) {
+        let listElement = document.createElement('LI');
+        stars.appendChild(listElement);
+        let iElement = document.createElement('I');
+        iElement.classList.add('fa', 'fa-star');
+        listElement.appendChild(iElement);
     }
 }
 
@@ -65,15 +109,11 @@ function checkMatch() {
         const cardSymbolElementClassname = cardSymbolElement.classList;
         const classNameArray = cardSymbolElementClassname.values();
         for(sClassName of classNameArray) {
-            if(sClassName !== "fa")
+            if(sClassName !== 'fa')
             symbolsGiven.push(sClassName);
         }
     }
-    if(symbolsGiven[0] === symbolsGiven[1]) {
-        return true;
-    } else {
-        return false;
-    }
+    return (symbolsGiven[0] === symbolsGiven[1]) ? true : false;
 }
 
 function openTheCard(card) {
@@ -109,13 +149,24 @@ function shuffle(array) {
     return array;
 }
 
-document.addEventListener('DOMContentLoaded', function(){
+function initGame() {
+    openCards = [];
+    closedCards = [];
+    matchMoves = 0;
+    matchedPairs = 0;
+    starCount = 3;
+    displayStars(starCount);
     const gameSymbols = prepareSymbols();
     displayCardsOnGame(gameSymbols);
+    document.querySelector('.moves').innerText = '0';
+    document.querySelector('.movesText').innerText = 'Moves';
     const cards = document.querySelectorAll('.card');
     for(let card of cards) {
         card.addEventListener('click',cardListener);
     }
+}
+document.addEventListener('DOMContentLoaded', function(){
+    initGame();
 });
 
 /*
